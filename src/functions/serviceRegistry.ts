@@ -4,4 +4,4 @@ import { Token } from '../types/Token';
 const _serviceRegistry = new Map<Token, any>();
 
 export const serviceRegistry = () => _serviceRegistry;
-export const resolving = new Set<string>();
+export const resolving = new Set<Token>();
