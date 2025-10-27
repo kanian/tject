@@ -23,8 +23,7 @@ describe('resetContainer', () => {
     // Reset the container
     resetContainer();
 
-    // The registry should be cleared, but we can still create new instances
-    const newInstance = inject(TransientService);
+    expect(() => inject(TransientService)).toThrow(/No dependency registered/);
     // This here is to show you that resetContainer is quirky
     expect(serviceRegistry().size).toBe(0);
     // This here is to show you that you must use registerValue to get the same behavior

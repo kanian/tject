@@ -22,29 +22,28 @@ import { serviceRegistry } from './serviceRegistry';
  * @throws Error if the service is not registered or if a dependency cannot be resolved.
  */
 
-
 export const inject = <T, U extends Injectable<T> = Injectable<T>>(
   token: Token,
   forceNew = false
 ): T => {
   let stackKey: Token | Injectable<any> = token;
   let ctor: U;
-  if (typeof token === 'string' || typeof token === 'symbol') {
-    const registered = serviceRegistry().get(token);
-    if (!registered) {
-      throw new Error(`No dependency registered for token "${String(token)}"`);
-    }
-
-    if (registered.isValue) {
-      return registered.value;
-    }
-    stackKey = registered;
-    ctor = registered; // <-- FIX 2: Assign the class to ctor
-    console.log('in inject; resolved token to class:', token, ctor);
-    console.log('in inject; class token name:', ctor[tokenName]);
-  } else {
+  // if (typeof token === 'string' || typeof token === 'symbol') {
+  const registered = serviceRegistry().get(token);
+  if (!registered) {
     throw new Error(`No dependency registered for token "${String(token)}"`);
   }
+
+  if (registered.isValue) {
+    return registered.value;
+  }
+  stackKey = registered;
+  ctor = registered; // <-- FIX 2: Assign the class to ctor
+  console.log('in inject; resolved token to class:', token, ctor);
+  console.log('in inject; class token name:', ctor[tokenName]);
+  // } else {
+  //   throw new Error(`No dependency registered for token "${String(token)}"`);
+  // }
   const isTransient = ctor[transient];
 
   console.log('in inject; registered for token:', token, ctor);
@@ -53,8 +52,6 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
   if (!forceNew && !isTransient && ctor[singleton]) {
     return ctor[singleton];
   }
-
-
 
   console.log('in inject; Injecting service for token:', ctor[tokenName]);
   console.log('in inject; Service dependencies:', ctor[dependencies]);

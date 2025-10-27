@@ -5,19 +5,17 @@ import { inject } from './inject';
 import { Service } from '../decorators/Service';
 
 describe('Bootstrap Functionality', () => {
-  beforeEach(() => {
-    // initializeContainer();
-  });
+
 
   test('should process root module and its imports', () => {
-    @Service()
+    @Service({token: 'ServiceA'})
     class ServiceA {
       getValue() {
         return 'A';
       }
     }
 
-    @Service()
+    @Service({token: 'ServiceB'})
     class ServiceB {
       getValue() {
         return 'B';
@@ -41,8 +39,8 @@ describe('Bootstrap Functionality', () => {
 
     bootstrap(rootModule);
 
-    const instanceA: ServiceA = inject(ServiceA);
-    const instanceB: ServiceB = inject(ServiceB);
+    const instanceA: ServiceA = inject('ServiceA');
+    const instanceB: ServiceB = inject('ServiceB');
 
     expect(instanceA.getValue()).toBe('A');
     expect(instanceB.getValue()).toBe('B');
@@ -90,7 +88,7 @@ describe('Bootstrap Functionality', () => {
   })
 
   test('should register raw class providers', () => {
-
+    @Service()
     class TokenService {
       getValue() {
         return 'TokenService';

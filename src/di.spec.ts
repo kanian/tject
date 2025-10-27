@@ -42,7 +42,7 @@ describe('Enhanced Dependency Injection System', () => {
     it('should handle circular dependencies', () => {
       @Service({ token: 'ServiceA' })
       class ServiceA {
-        @Inject('ServiceB') private serviceB!: ServiceB;
+        @Inject('ServiceB', true) private serviceB!: ServiceB;
         getValue() {
           return 'A';
         }
