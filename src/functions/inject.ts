@@ -38,6 +38,7 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
   if (typeof token === 'string' || typeof token === 'symbol') {
     const registered = serviceRegistry().get(token);
     if (!registered) {
+      resolving.delete(token);
       throw new Error(`No dependency registered for token "${String(token)}"`);
     }
 
