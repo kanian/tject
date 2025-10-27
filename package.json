@@ -1,0 +1,36 @@
+{
+  "name": "@kanian77/typejection",
+  "version": "0.1.2",
+  "description": "A dependency injection library for TypeScript.",
+  "author": {
+    "name": "Patrick Assoa Adou",
+    "email": "kanian77@gmail.com"
+  },
+  "repository": "git@github.com:kanian/typejection.git",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./dist/*": {
+      "import": "./dist/*.js",
+      "require": "./dist/*.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build --verbose",
+    "dev": "tsc --build --verbose --watch",
+    "clean": "rm -rf dist && rm -f tsconfig.tsbuildinfo",
+    "prepare": "bun run clean && bun run build"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2"
+  },
+  "dependencies": {
+    "@types/bun": "^1.2.4"
+  }
+}

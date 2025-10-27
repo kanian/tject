@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    // CHANGE THIS: Lower the target to force decorator transpilation
+    "target": "ES2015",
+    // "target": "ESNext",
+    // KEEP THESE: Enable decorators
+    "experimentalDecorators": false,
+    "emitDecoratorMetadata": false,
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,  // Optional: creates sourcemap for .d.ts files
+    "sourceMap": true        // Optional: creates sourcemaps for .js files
+  },
+  "include": ["src/**/*"]
+}
