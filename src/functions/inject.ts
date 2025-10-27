@@ -6,7 +6,7 @@ import {
   tokenName,
 } from '../types/symbols';
 import { Token } from '../types/Token';
-import { serviceRegistry } from './serviceRegistry';
+import { resolving, serviceRegistry } from './serviceRegistry';
 
 /**
  * Injects a service based on the provided token.
@@ -26,18 +26,26 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
   token: Token,
   forceNew = false
 ): T => {
-  let stackKey: Token | Injectable<any> = token;
+  if (resolving.has(token) && !resolving.get(token)?.lazy) {
+    throw new Error(
+      `Circular dependency detected! Path: ${[...resolving, token].join(
+        ' -> '
+      )}`
+    );
+  }
+  resolving.set(token, { lazy: false });
   let ctor: U;
   // if (typeof token === 'string' || typeof token === 'symbol') {
   const registered = serviceRegistry().get(token);
   if (!registered) {
+    resolving.delete(token);
     throw new Error(`No dependency registered for token "${String(token)}"`);
   }
 
   if (registered.isValue) {
+    resolving.delete(token);
     return registered.value;
   }
-  stackKey = registered;
   ctor = registered; // <-- FIX 2: Assign the class to ctor
   console.log('in inject; resolved token to class:', token, ctor);
   console.log('in inject; class token name:', ctor[tokenName]);
@@ -50,6 +58,7 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
 
   // For singleton services, return cached instance unless forceNew is true
   if (!forceNew && !isTransient && ctor[singleton]) {
+    resolving.delete(token);
     return ctor[singleton];
   }
 
@@ -73,5 +82,6 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
   if (!isTransient && !forceNew) {
     ctor[singleton] = instance;
   }
+  resolving.delete(token);
   return instance;
 };

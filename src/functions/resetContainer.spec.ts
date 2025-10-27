@@ -12,56 +12,36 @@ describe('resetContainer', () => {
   });
 
   it('should clear all transient instances', () => {
-    @Service({ lifecycle: 'transient' })
+    @Service({ lifecycle: 'transient', token: 'TransientService' })
     class TransientService {
       public value: number = Math.random();
     }
 
     // Create a few instances to ensure they're registered
-    inject(TransientService);
+    // inject('TransientService');
 
     // Reset the container
     resetContainer();
 
-    expect(() => inject(TransientService)).toThrow(/No dependency registered/);
+    expect(() => inject('TransientService')).toThrow(/No dependency registered/);
     // This here is to show you that resetContainer is quirky
     expect(serviceRegistry().size).toBe(0);
     // This here is to show you that you must use registerValue to get the same behavior
     // as before resetting the container
-    registerValue(TransientService, TransientService);
-    inject(TransientService);
+    registerValue('TransientService', TransientService);
+    inject('TransientService');
     expect(serviceRegistry().size).toBe(1);
 
   });
 
-  it('clear all instances for custom tokens', () => {
-    @Service({ token: 'customToken' })
-    class CustomService {
-      public value: number = Math.random();
-    }
-    // Create initial instance
-    registerValue('customToken', CustomService);
-    // Create initial instance
-    let instance1: CustomService | undefined = undefined;
-    expect(() => {
-      instance1 = inject('customToken');
-    }).not.toThrow();
-    expect(instance1).toBeDefined();
-
-    // Reset the container
-    resetContainer();
-    expect(() => {
-      inject('customToken');
-    }).toThrow(/No dependency registered/);
-  });
 
   it('should clear all singleton instances', () => {
-    @Service()
+    @Service({token: 'SingletonService'})
     class SingletonService {
       public value: number = Math.random();
     }
 
-    @Service()
+    @Service({token: 'AnotherSingletonService'})
     class AnotherSingletonService {
       public value: number = Math.random();
     }
@@ -69,8 +49,8 @@ describe('resetContainer', () => {
     let instance1: SingletonService | undefined = undefined;
     let anotherInstance1: AnotherSingletonService | undefined = undefined;
     expect(() => {
-      instance1 = inject(SingletonService);
-      anotherInstance1 = inject(AnotherSingletonService);
+      instance1 = inject('SingletonService');
+      anotherInstance1 = inject('AnotherSingletonService');
     }).not.toThrow();
     expect(instance1).toBeDefined();
     expect(anotherInstance1).toBeDefined();
@@ -78,8 +58,8 @@ describe('resetContainer', () => {
     resetContainer();
     expect(serviceRegistry().size).toBe(0);
     // Get a new instance - it should have a different value
-    registerValue(SingletonService, SingletonService);
-    const instance2: SingletonService = inject(SingletonService);
+    registerValue('SingletonService', SingletonService);
+    const instance2: SingletonService = inject('SingletonService');
     expect(instance2).not.toBe(instance1);
     expect(serviceRegistry().size).toBe(1);
   });

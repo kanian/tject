@@ -6,11 +6,12 @@ import { Inject } from './decorators/Inject';
 import { registerValue } from './functions/registerValue';
 import { inject } from './functions/inject';
 import { Injectable } from './types/Injectable';
+import { resetContainer } from './functions/resetContainer';
 
 describe('Enhanced Dependency Injection System', () => {
   // Reset registry before each test
   beforeEach(() => {
-    //
+    resetContainer();
   });
 
   describe('Basic DI functionality', () => {
@@ -39,10 +40,10 @@ describe('Enhanced Dependency Injection System', () => {
       expect(instanceB.getValue()).toBe('AB');
     });
 
-    it('should handle circular dependencies', () => {
+    it('should throw on circular dependencies', () => {
       @Service({ token: 'ServiceA' })
       class ServiceA {
-        @Inject('ServiceB', true) private serviceB!: ServiceB;
+        @Inject('ServiceB') private serviceB!: ServiceB;
         getValue() {
           return 'A';
         }
@@ -55,14 +56,34 @@ describe('Enhanced Dependency Injection System', () => {
           return this.serviceA.getValue() + 'B';
         }
       }
-      const ctor = ServiceB as unknown as Injectable<ServiceB>;
 
-      console.log('ServiceB dependencies:', ctor[dependencies]);
+      expect(() => inject<ServiceA>('ServiceA')).toThrowError(
+        /Circular dependency detected.*/
+      );
+    });
 
-      const instanceA: ServiceA = inject<ServiceA>('ServiceA');
-      expect(instanceA.getValue()).toBe('A');
-      const instanceB: ServiceB = inject('ServiceB');
-      expect(instanceB.getValue()).toBe('AB');
+    it('should not throw on lazy handling of circular dependencies', () => {
+      @Service({ token: 'ServiceA' })
+      class ServiceA {
+        @Inject('ServiceB', true) private serviceB!: ServiceB;
+        getValue() {
+          return 'A';
+        }
+      }
+      @Service({ token: 'ServiceB' })
+      class ServiceB {
+        @Inject('ServiceA', true) private serviceA!: ServiceA;
+        constructor() {}
+        getValue() {
+          return this.serviceA.getValue() + 'B';
+        }
+      }
+
+      // expect(() => inject<ServiceA>('ServiceA')).not.toThrowError(
+      //   /Circular dependency detected/
+      // );
+      expect(inject<ServiceA>('ServiceA').getValue()).toBe('A');
+      expect(inject<ServiceB>('ServiceB').getValue()).toBe('AB');
     });
 
     it('should create a single instance', () => {

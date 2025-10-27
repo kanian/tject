@@ -1,5 +1,5 @@
 import { singleton, transient } from '../types/symbols';
-import { serviceRegistry } from './serviceRegistry';
+import { resolving, serviceRegistry } from './serviceRegistry';
 
 /**
  * Resets the dependency injection container.
@@ -28,4 +28,6 @@ export function resetContainer(): void {
   });
   // Clear the registry itself
   registry.clear();
+  // Clear the resolving map
+  resolving.clear();
 }
