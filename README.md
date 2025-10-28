@@ -52,8 +52,9 @@ Programmatic injection:
 
 ```ts
 const svc = inject<MyService>(MyService);
+// See src/functions/inject.spec.ts for more info
 ```
-
+See [inject.ts](src/functions/inject.ts) and [inject.spec.ts](src/functions/inject.spec.ts) for more info
 Register values or factories (via Module providers):
 
 ```ts
