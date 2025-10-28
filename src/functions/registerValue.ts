@@ -1,6 +1,7 @@
-import { Token } from "../types/Token";
-import { inject } from "./inject";
-import { serviceRegistry } from "./serviceRegistry";
+import { ScopeToken } from '../types/ScopeToken';
+import { Token } from '../types/Token';
+import { inject } from './inject';
+import { getServiceRegistry } from './registries';
 
 /**
  * Register a value or class as a service for dependency injection.
@@ -15,7 +16,8 @@ import { serviceRegistry } from "./serviceRegistry";
 export function registerValue(
   token: Token,
   value: any,
-  resolveDeps = false
+  resolveDeps = false,
+  scope?: ScopeToken
 ): void {
   const isClass =
     typeof value === 'function' && /^class\s/.test(value.toString());
@@ -24,7 +26,7 @@ export function registerValue(
       ? inject(value)
       : new value()
     : value;
-  serviceRegistry().set(token, {
+  getServiceRegistry(scope).set(token, {
     isValue: true,
     value: instance,
   });

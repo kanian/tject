@@ -1,7 +1,8 @@
-import { Constructor } from "./Constructor";
-import { ImportOptions } from "./ImportOptions";
-import { Module } from "./Module";
-import { ProviderOptions } from "./ProviderOptions";
+import { Constructor } from './Constructor';
+import { ImportOptions } from './ImportOptions';
+import { Module } from './Module';
+import { ProviderOptions } from './ProviderOptions';
+import { ScopeToken } from './ScopeToken';
 
 /**
  * RootModuleOptions interface
@@ -10,4 +11,5 @@ import { ProviderOptions } from "./ProviderOptions";
 export interface ModuleOptions {
   imports?: ImportOptions[]; // Other modules to import
   providers?: ProviderOptions[]; // Services to register in this module
+  scope?: ScopeToken;
 }

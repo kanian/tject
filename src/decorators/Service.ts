@@ -7,8 +7,7 @@ import {
   singleton,
 } from '../types/symbols';
 import { Token } from '../types/Token';
-import { serviceRegistry } from '../functions/serviceRegistry';
-import { getTokenName } from '../functions/getTokenName';
+import { registerService } from '../functions/registries';
 import { inject } from '../functions/inject';
 
 /**
@@ -25,7 +24,6 @@ export function Service(options?: ServiceOptions) {
     // Important: Use target (the class) directly, not this.constructor
     const ctor = target;
 
-    let finalOptions: ServiceOptions = {};
     let isTransient = false;
     let deps: Array<Token | any> = [];
 
@@ -35,16 +33,15 @@ export function Service(options?: ServiceOptions) {
       typeof options === 'object' &&
       !(options instanceof Function)
     ) {
-      finalOptions = options;
-      deps = finalOptions.dependencies || [];
-      isTransient = finalOptions.lifecycle === 'transient';
+      deps = options.dependencies || [];
+      isTransient = options.lifecycle === 'transient';
     }
 
     // Store metadata on the class constructor
     ctor[transient] = isTransient;
 
-    if (finalOptions.token) {
-      ctor[tokenName] = finalOptions.token;
+    if (options?.token) {
+      ctor[tokenName] = options.token;
     }
 
     // Store the UNORDERED dependencies list directly.
@@ -56,8 +53,8 @@ export function Service(options?: ServiceOptions) {
     }
 
     // Register the service - use the token if provided, otherwise use the class itself
-    const serviceToken = finalOptions.token || ctor;
-    serviceRegistry().set(serviceToken, ctor);
+    const serviceToken = options?.token || ctor;
+    registerService(serviceToken, ctor, options?.scope);
 
     // Add instance property after class is fully initialized
     context.addInitializer(function () {

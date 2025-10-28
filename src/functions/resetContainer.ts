@@ -1,5 +1,9 @@
 import { singleton, transient } from '../types/symbols';
-import { resolving, serviceRegistry } from './serviceRegistry';
+import {
+  destroyRegistries,
+  getResolvingMap,
+  getServiceRegistry,
+} from './registries';
 
 /**
  * Resets the dependency injection container.
@@ -10,24 +14,6 @@ import { resolving, serviceRegistry } from './serviceRegistry';
  * You will need to use registerValue if you are using custom tokens in order to get the same behavior as
  * before resetting the container.
  */
-export function resetContainer(): void {
-  const registry = serviceRegistry();
-  // Clear all entries in the service registry
-  registry.forEach((value, key) => {
-    if (value) {
-      // Clear singleton instances
-      if (value[singleton]) {
-        delete value[singleton];
-      }
-      // Clear transient instances
-      if (value[transient]) {
-        delete value[transient];
-      }
-    }
-    registry.delete(key);
-  });
-  // Clear the registry itself
-  registry.clear();
-  // Clear the resolving map
-  resolving.clear();
+export function resetRegistries(): void {
+  destroyRegistries();
 }

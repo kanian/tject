@@ -4,6 +4,7 @@ import { bootstrap } from './bootstrap';
 import { inject } from './inject';
 import { Service } from '../decorators/Service';
 import { Inject } from '../decorators/Inject';
+import { createScope } from './registries';
 
 describe('Bootstrap Functionality', () => {
   test('should process root module and its imports', () => {
@@ -260,6 +261,66 @@ describe('Bootstrap Functionality', () => {
           ],
         },
       ],
+    });
+    const rootModule = new Module({
+      imports: [{ module: moduleY }],
+    });
+
+    bootstrap(rootModule);
+
+    const instanceY: ServiceY = inject('ServiceY');
+    expect(instanceY.getValue()).toBe('XY');
+  });
+  test('should work with scoped registries', () => {
+    const SCOPE_X = 'scope-x';
+    createScope(SCOPE_X);
+    @Service({ token: 'ServiceX', scope: SCOPE_X })
+    class ServiceX {
+      getValue() {
+        return 'X';
+      }
+    }
+
+    const SCOPE_Y = 'scope-y';
+    createScope(SCOPE_Y);
+    @Service({ token: 'ServiceY', scope: SCOPE_Y })
+    class ServiceY {
+      @Inject('ServiceX') private serviceX!: ServiceX;
+      constructor() {}
+      getValue() {
+        return this.serviceX.getValue() + 'Y';
+      }
+    }
+
+    const moduleX = new Module({
+      providers: [
+        {
+          provide: 'ServiceX',
+          useClass: ServiceX,
+        },
+      ],
+      scope: SCOPE_X,
+    });
+
+    const moduleY = new Module({
+      providers: [
+        {
+          provide: 'ServiceY',
+          useClass: ServiceY,
+        },
+      ],
+      imports: [
+        {
+          module: moduleX,
+          binds: [
+            {
+              to: 'ServiceY',
+              from: 'ServiceX',
+            },
+          ],
+        },
+      ],
+      scope: SCOPE_Y
     });
     const rootModule = new Module({
       imports: [{ module: moduleY }],

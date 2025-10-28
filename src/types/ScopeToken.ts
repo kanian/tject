@@ -1,0 +1,1 @@
+export type ScopeToken = string | symbol | object

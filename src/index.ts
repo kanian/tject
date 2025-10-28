@@ -3,7 +3,7 @@ export * from './decorators/Service';
 export * from './functions/registerValue';
 export * from './functions/inject';
 export * from './functions/resetContainer';
-export * from './functions/serviceRegistry';
+export * from './functions/registries';
 export * from './types/Module';
 export * from './types/ModuleOptions';
 export * from './types/ProviderOptions';

@@ -6,12 +6,12 @@ import { Inject } from './decorators/Inject';
 import { registerValue } from './functions/registerValue';
 import { inject } from './functions/inject';
 import { Injectable } from './types/Injectable';
-import { resetContainer } from './functions/resetContainer';
+import { resetRegistries } from './functions/resetContainer';
 
 describe('Enhanced Dependency Injection System', () => {
   // Reset registry before each test
   beforeEach(() => {
-    resetContainer();
+    resetRegistries();
   });
 
   describe('Basic DI functionality', () => {

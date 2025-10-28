@@ -1,14 +1,14 @@
 import { expect, test, describe, beforeEach, it, afterEach } from 'bun:test';
-import { resetContainer } from './resetContainer';
+import { resetRegistries } from './resetContainer';
 import { Service } from '../decorators/Service';
 import { inject } from './inject';
 import { registerValue } from './registerValue';
-import { serviceRegistry } from './serviceRegistry';
+import { createScope, getServiceRegistry } from './registries';
 
 describe('resetContainer', () => {
   // Always reset after each test to avoid interference between tests
   afterEach(() => {
-    resetContainer();
+    resetRegistries();
   });
 
   it('should clear all transient instances', () => {
@@ -21,27 +21,27 @@ describe('resetContainer', () => {
     // inject('TransientService');
 
     // Reset the container
-    resetContainer();
+    resetRegistries();
 
-    expect(() => inject('TransientService')).toThrow(/No dependency registered/);
+    expect(() => inject('TransientService')).toThrow(
+      /No dependency registered/
+    );
     // This here is to show you that resetContainer is quirky
-    expect(serviceRegistry().size).toBe(0);
+    expect(getServiceRegistry().size).toBe(0);
     // This here is to show you that you must use registerValue to get the same behavior
     // as before resetting the container
     registerValue('TransientService', TransientService);
     inject('TransientService');
-    expect(serviceRegistry().size).toBe(1);
-
+    expect(getServiceRegistry().size).toBe(1);
   });
 
-
   it('should clear all singleton instances', () => {
-    @Service({token: 'SingletonService'})
+    @Service({ token: 'SingletonService' })
     class SingletonService {
       public value: number = Math.random();
     }
 
-    @Service({token: 'AnotherSingletonService'})
+    @Service({ token: 'AnotherSingletonService' })
     class AnotherSingletonService {
       public value: number = Math.random();
     }
@@ -55,13 +55,13 @@ describe('resetContainer', () => {
     expect(instance1).toBeDefined();
     expect(anotherInstance1).toBeDefined();
     // Reset the container
-    resetContainer();
-    expect(serviceRegistry().size).toBe(0);
+    resetRegistries();
+    expect(getServiceRegistry().size).toBe(0);
     // Get a new instance - it should have a different value
     registerValue('SingletonService', SingletonService);
     const instance2: SingletonService = inject('SingletonService');
     expect(instance2).not.toBe(instance1);
-    expect(serviceRegistry().size).toBe(1);
+    expect(getServiceRegistry().size).toBe(1);
   });
 
   it('should clear registered values', () => {
@@ -75,7 +75,7 @@ describe('resetContainer', () => {
     expect(configValue).toBe(config);
 
     // Reset the container
-    resetContainer();
+    resetRegistries();
 
     // The value should no longer be registered
     expect(() => inject(CONFIG_TOKEN)).toThrow(/No dependency registered/);
@@ -95,8 +95,8 @@ describe('resetContainer', () => {
     expect(original.getValue()).toBe('original');
 
     // Reset the container
-    resetContainer();
-    expect(serviceRegistry().size).toBe(0);
+    resetRegistries();
+    expect(getServiceRegistry().size).toBe(0);
 
     // Register a new service with the same token
     @Service({ token: SERVICE_TOKEN })
@@ -108,6 +108,41 @@ describe('resetContainer', () => {
 
     const newInstance = inject<NewService>(SERVICE_TOKEN);
     expect(newInstance.getValue()).toBe('new');
-    expect(serviceRegistry().size).toBe(1);
+    expect(getServiceRegistry().size).toBe(1);
+  });
+  it('should work with scoped registries', () => {
+    const SERVICE_TOKEN = 'serviceToken';
+    const TEST_SCOPE = 'test-scope';
+    createScope(TEST_SCOPE);
+
+    @Service({ token: SERVICE_TOKEN, scope: TEST_SCOPE })
+    class OriginalService {
+      getValue() {
+        return 'original';
+      }
+    }
+
+    const original = inject<OriginalService>(
+      SERVICE_TOKEN,
+      false,
+      TEST_SCOPE
+    );
+    expect(original.getValue()).toBe('original');
+
+    // Reset the container
+    resetRegistries();
+    expect(getServiceRegistry(TEST_SCOPE).size).toBe(0);
+
+    // Register a new service with the same token
+    @Service({ token: SERVICE_TOKEN, scope: TEST_SCOPE })
+    class NewService {
+      getValue() {
+        return 'new';
+      }
+    }
+
+    const newInstance = inject<NewService>(SERVICE_TOKEN, false, TEST_SCOPE);
+    expect(newInstance.getValue()).toBe('new');
+    expect(getServiceRegistry(TEST_SCOPE).size).toBe(1);
   });
 });

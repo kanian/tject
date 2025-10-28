@@ -1,4 +1,5 @@
 import { Injectable } from '../types/Injectable';
+import { ScopeToken } from '../types/ScopeToken';
 import {
   transient,
   singleton,
@@ -6,7 +7,7 @@ import {
   tokenName,
 } from '../types/symbols';
 import { Token } from '../types/Token';
-import { resolving, serviceRegistry } from './serviceRegistry';
+import { getResolvingMap, getServiceRegistry } from './registries';
 
 /**
  * Injects a service based on the provided token.
@@ -24,26 +25,28 @@ import { resolving, serviceRegistry } from './serviceRegistry';
 
 export const inject = <T, U extends Injectable<T> = Injectable<T>>(
   token: Token,
-  forceNew = false
+  forceNew = false,
+  scope?: ScopeToken
 ): T => {
-  if (resolving.has(token) && !resolving.get(token)?.lazy) {
+  const resolvingMap = getResolvingMap(scope);
+  if (resolvingMap.has(token) && !resolvingMap.get(token)?.lazy) {
     throw new Error(
-      `Circular dependency detected! Path: ${[...resolving, token].join(
+      `Circular dependency detected! Path: ${[...resolvingMap, token].join(
         ' -> '
       )}`
     );
   }
-  resolving.set(token, { lazy: false });
+  resolvingMap.set(token, { lazy: false });
   let ctor: U;
   // if (typeof token === 'string' || typeof token === 'symbol') {
-  const registered = serviceRegistry().get(token);
+  const registered = getServiceRegistry(scope).get(token);
   if (!registered) {
-    resolving.delete(token);
+    resolvingMap.delete(token);
     throw new Error(`No dependency registered for token "${String(token)}"`);
   }
 
   if (registered.isValue) {
-    resolving.delete(token);
+    resolvingMap.delete(token);
     return registered.value;
   }
   ctor = registered; // <-- FIX 2: Assign the class to ctor
@@ -55,7 +58,7 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
 
   // For singleton services, return cached instance unless forceNew is true
   if (!forceNew && !isTransient && ctor[singleton]) {
-    resolving.delete(token);
+    resolvingMap.delete(token);
     return ctor[singleton];
   }
 
@@ -76,6 +79,6 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
   if (!isTransient && !forceNew) {
     ctor[singleton] = instance;
   }
-  resolving.delete(token);
+  resolvingMap.delete(token);
   return instance;
 };
