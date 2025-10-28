@@ -32,8 +32,6 @@ describe('Enhanced Dependency Injection System', () => {
       }
       const ctor = ServiceB as unknown as Injectable<ServiceB>;
 
-      console.log('ServiceB dependencies:', ctor[dependencies]);
-
       const instanceA: ServiceA = inject<ServiceA>('ServiceA');
       expect(instanceA.getValue()).toBe('A');
       const instanceB: ServiceB = inject('ServiceB');
@@ -161,7 +159,6 @@ describe('Enhanced Dependency Injection System', () => {
       }
 
       const instance = inject<MixedService>('MixedService');
-      console.log('instance', instance);
       const values = instance.getValues();
 
       expect(values.helper).toBe('helper');

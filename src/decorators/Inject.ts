@@ -40,7 +40,6 @@ export function Inject(token: Token, lazy = false) {
       }
 
       if (!lazy) {
-        console.log('inInject; injecting token eagerly:', token);
         const registeredValue = inject(token);
 
         Object.defineProperty(this, context.name, {
@@ -50,7 +49,6 @@ export function Inject(token: Token, lazy = false) {
           configurable: false,
         });
       } else {
-        console.log('in Inject; setting up lazy injection for token:', token);
         resolving.set(token, { lazy: true });
         let _value: any;
 

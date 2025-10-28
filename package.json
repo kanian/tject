@@ -1,6 +1,6 @@
 {
   "name": "@kanian77/tject",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "A dependency injection library for TypeScript.",
   "author": {
     "name": "Patrick Assoa Adou",

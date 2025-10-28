@@ -55,9 +55,6 @@ export function Service(options?: ServiceOptions) {
       ctor[dependencies] = deps.map((dep) => ({ token: dep }));
     }
 
-    console.log('in Service decorator; service token:', ctor[tokenName] || ctor.name);
-    console.log('in Service decorator; service dependencies:', ctor[dependencies]);
-
     // Register the service - use the token if provided, otherwise use the class itself
     const serviceToken = finalOptions.token || ctor;
     serviceRegistry().set(serviceToken, ctor);

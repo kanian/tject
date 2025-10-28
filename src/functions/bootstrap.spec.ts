@@ -137,7 +137,6 @@ describe('Bootstrap Functionality', () => {
         return 'C';
       }
     }
-    console.log('ServiceC name ', ServiceC.name);
     const moduleB = new Module({
       providers: [{
         provide: 'ServiceC',

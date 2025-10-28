@@ -47,14 +47,11 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
     return registered.value;
   }
   ctor = registered; // <-- FIX 2: Assign the class to ctor
-  console.log('in inject; resolved token to class:', token, ctor);
-  console.log('in inject; class token name:', ctor[tokenName]);
+
   // } else {
   //   throw new Error(`No dependency registered for token "${String(token)}"`);
   // }
   const isTransient = ctor[transient];
-
-  console.log('in inject; registered for token:', token, ctor);
 
   // For singleton services, return cached instance unless forceNew is true
   if (!forceNew && !isTransient && ctor[singleton]) {
@@ -62,11 +59,8 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
     return ctor[singleton];
   }
 
-  console.log('in inject; Injecting service for token:', ctor[tokenName]);
-  console.log('in inject; Service dependencies:', ctor[dependencies]);
   const deps = ctor[dependencies] || [];
   const resolvedDeps = deps.map((dep) => {
-    console.log('in inject; Resolving dependency for token:', dep.token);
     const depInstance = inject(dep.token);
     if (!depInstance) {
       throw new Error(
