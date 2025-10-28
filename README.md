@@ -84,19 +84,19 @@ Module providers — the three supported forms
 When configuring a `Module`, a provider can be declared in one of three ways. The module system supports:
 
 - useClass — register a class to be instantiated when the token is requested
-  
+
   ```ts
   { provide: 'MyToken', useClass: MyService }
   ```
 
 - useValue — register a static value (useful for configuration)
-  
+
   ```ts
   { provide: 'CONFIG', useValue: { apiUrl: 'https://api' } }
   ```
 
 - useFactory — register a factory function that returns the value/instance
-  
+
   ```ts
   { provide: 'ID', useFactory: () => Math.random().toString(36).slice(2) }
   ```
@@ -148,7 +148,7 @@ bootstrap(new Module({ imports: [{ module: moduleY }] }));
 const instanceY = inject('ServiceY');
 // instanceY.getValue() can now call into ServiceX because the dependency was added
 ```
-
+// Look at tests for more examples of import binds with scopes: `src/functions/bootstrap.spec.ts`
 ## Runtimes and decorator support
 
 The new TypeScript decorator standard (Stage 3) is supported differently by runtimes. Choose the workflow that matches your runtime.
