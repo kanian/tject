@@ -6,5 +6,5 @@ export interface ImportOptions {
    * The module to import.
    */
   module: Module;
-  binds?: [{ importingProvider: Token; importedProvider: Token }];
+  binds?: [{ to: Token; from: Token }];
 }

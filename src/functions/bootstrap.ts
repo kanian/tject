@@ -3,7 +3,6 @@ import { Module } from '../types/Module';
 import { dependencies, tokenName } from '../types/symbols';
 import { Token } from '../types/Token';
 import { getTokenName } from './getTokenName';
-import { inject } from './inject';
 import { registerValue } from './registerValue';
 import { serviceRegistry } from './serviceRegistry';
 
@@ -21,7 +20,7 @@ export function bootstrap(rootModule: Module) {
           // Ensure dependencies are registered
           if (importedModule.binds) {
             importedModule.binds.forEach(
-              ({ importingProvider, importedProvider }) => {
+              ({ to: importingProvider, from: importedProvider }) => {
                 if (importingProvider === provider.provide) {
                   addDependencyIfMissing(provider.provide, importedProvider);
                 }

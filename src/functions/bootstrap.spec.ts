@@ -6,17 +6,15 @@ import { Service } from '../decorators/Service';
 import { Inject } from '../decorators/Inject';
 
 describe('Bootstrap Functionality', () => {
-
-
   test('should process root module and its imports', () => {
-    @Service({token: 'ServiceA'})
+    @Service({ token: 'ServiceA' })
     class ServiceA {
       getValue() {
         return 'A';
       }
     }
 
-    @Service({token: 'ServiceB'})
+    @Service({ token: 'ServiceB' })
     class ServiceB {
       getValue() {
         return 'B';
@@ -24,18 +22,22 @@ describe('Bootstrap Functionality', () => {
     }
 
     const moduleA = new Module({
-      providers: [{
-        provide: 'ServiceA',
-        useClass: ServiceA,
-      }],
+      providers: [
+        {
+          provide: 'ServiceA',
+          useClass: ServiceA,
+        },
+      ],
     });
 
     const rootModule = new Module({
-      imports: [{module: moduleA}],
-      providers: [{
-        provide: 'ServiceB',
-        useClass: ServiceB,
-      }],
+      imports: [{ module: moduleA }],
+      providers: [
+        {
+          provide: 'ServiceB',
+          useClass: ServiceB,
+        },
+      ],
     });
 
     bootstrap(rootModule);
@@ -86,7 +88,7 @@ describe('Bootstrap Functionality', () => {
     bootstrap(rootModule);
     const instanceA = inject<ClassA>('ClassA');
     expect(instanceA.getValue()).toBe('ClassA');
-  })
+  });
 
   test('should register raw class providers', () => {
     @Service()
@@ -139,18 +141,20 @@ describe('Bootstrap Functionality', () => {
       }
     }
     const moduleB = new Module({
-      providers: [{
-        provide: 'ServiceC',
-        useClass: ServiceC,
-      }],
+      providers: [
+        {
+          provide: 'ServiceC',
+          useClass: ServiceC,
+        },
+      ],
     });
 
     const moduleA = new Module({
-      imports: [{module: moduleB}],
+      imports: [{ module: moduleB }],
     });
 
     const rootModule = new Module({
-      imports: [{module: moduleA}],
+      imports: [{ module: moduleA }],
     });
 
     bootstrap(rootModule);
@@ -159,95 +163,111 @@ describe('Bootstrap Functionality', () => {
     expect(instanceC.getValue()).toBe('C');
   });
   test('should handle import bindings', () => {
-    @Service({token: 'ServiceX'})
+    @Service({ token: 'ServiceX' })
     class ServiceX {
       getValue() {
         return 'X';
       }
     }
 
-    @Service({token: 'ServiceY'})
+    @Service({ token: 'ServiceY' })
     class ServiceY {
-      constructor(private serviceX: ServiceX) { }
+      constructor(private serviceX: ServiceX) {}
       getValue() {
         return this.serviceX.getValue() + 'Y';
       }
     }
 
     const moduleX = new Module({
-      providers: [{
-        provide: 'ServiceX',
-        useClass: ServiceX,
-      }],
+      providers: [
+        {
+          provide: 'ServiceX',
+          useClass: ServiceX,
+        },
+      ],
     });
 
     const moduleY = new Module({
-      providers: [{
-        provide: 'ServiceY',
-        useClass: ServiceY,
-      }],
-      imports: [{
-        module: moduleX,
-        binds: [{
-          importingProvider: 'ServiceY',
-          importedProvider: 'ServiceX',
-        }],
-      }],
+      providers: [
+        {
+          provide: 'ServiceY',
+          useClass: ServiceY,
+        },
+      ],
+      imports: [
+        {
+          module: moduleX,
+          binds: [
+            {
+              to: 'ServiceY',
+              from: 'ServiceX',
+            },
+          ],
+        },
+      ],
     });
     const rootModule = new Module({
-      imports: [{module: moduleY}],
+      imports: [{ module: moduleY }],
     });
 
     bootstrap(rootModule);
 
     const instanceY: ServiceY = inject('ServiceY');
     expect(instanceY.getValue()).toBe('XY');
-  })
+  });
 
   test('should handle import bindings and redundant @Inject', () => {
-    @Service({token: 'ServiceX'})
+    @Service({ token: 'ServiceX' })
     class ServiceX {
       getValue() {
         return 'X';
       }
     }
 
-    @Service({token: 'ServiceY'})
+    @Service({ token: 'ServiceY' })
     class ServiceY {
       @Inject('ServiceX') private serviceX!: ServiceX;
-      constructor() { }
+      constructor() {}
       getValue() {
         return this.serviceX.getValue() + 'Y';
       }
     }
 
     const moduleX = new Module({
-      providers: [{
-        provide: 'ServiceX',
-        useClass: ServiceX,
-      }],
+      providers: [
+        {
+          provide: 'ServiceX',
+          useClass: ServiceX,
+        },
+      ],
     });
 
     const moduleY = new Module({
-      providers: [{
-        provide: 'ServiceY',
-        useClass: ServiceY,
-      }],
-      imports: [{
-        module: moduleX,
-        binds: [{
-          importingProvider: 'ServiceY',
-          importedProvider: 'ServiceX',
-        }],
-      }],
+      providers: [
+        {
+          provide: 'ServiceY',
+          useClass: ServiceY,
+        },
+      ],
+      imports: [
+        {
+          module: moduleX,
+          binds: [
+            {
+              to: 'ServiceY',
+              from: 'ServiceX',
+            },
+          ],
+        },
+      ],
     });
     const rootModule = new Module({
-      imports: [{module: moduleY}],
+      imports: [{ module: moduleY }],
     });
 
     bootstrap(rootModule);
 
     const instanceY: ServiceY = inject('ServiceY');
     expect(instanceY.getValue()).toBe('XY');
-  })
+  });
 });
