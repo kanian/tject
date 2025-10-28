@@ -52,8 +52,9 @@ Programmatic injection:
 
 ```ts
 const svc = inject<MyService>(MyService);
+// See src/functions/inject.spec.ts for more info
 ```
-
+See [inject.ts](src/functions/inject.ts) and [inject.spec.ts](src/functions/inject.spec.ts) for more info
 Register values or factories (via Module providers):
 
 ```ts
@@ -84,19 +85,19 @@ Module providers — the three supported forms
 When configuring a `Module`, a provider can be declared in one of three ways. The module system supports:
 
 - useClass — register a class to be instantiated when the token is requested
-  
+
   ```ts
   { provide: 'MyToken', useClass: MyService }
   ```
 
 - useValue — register a static value (useful for configuration)
-  
+
   ```ts
   { provide: 'CONFIG', useValue: { apiUrl: 'https://api' } }
   ```
 
 - useFactory — register a factory function that returns the value/instance
-  
+
   ```ts
   { provide: 'ID', useFactory: () => Math.random().toString(36).slice(2) }
   ```
