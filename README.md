@@ -21,7 +21,11 @@
 ```bash
 bun add @kanian77/tject
 ```
+or
 
+```bash
+npm install @kanian77/tject
+```
 ## Basic usage
 
 Register a class as a service with the decorator:
