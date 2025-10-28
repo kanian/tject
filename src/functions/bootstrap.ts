@@ -1,10 +1,11 @@
-import { Module } from "../types/Module";
-import { tokenName } from "../types/symbols";
-import { getTokenName } from "./getTokenName";
-import { inject } from "./inject";
-import { registerValue } from "./registerValue";
-import { serviceRegistry } from "./serviceRegistry";
-
+import { ImportOptions } from '../types/ImportOptions';
+import { Module } from '../types/Module';
+import { dependencies, tokenName } from '../types/symbols';
+import { Token } from '../types/Token';
+import { getTokenName } from './getTokenName';
+import { inject } from './inject';
+import { registerValue } from './registerValue';
+import { serviceRegistry } from './serviceRegistry';
 
 export function bootstrap(rootModule: Module) {
   // Process the root module and all its imports recursively
@@ -15,12 +16,26 @@ export function bootstrap(rootModule: Module) {
 
     // Process imported modules first
     if (module.imports && Array.isArray(module.imports)) {
-      module.imports.forEach(processModule);
+      module.imports.forEach((importedModule: ImportOptions) => {
+        module.providers.forEach((provider: any) => {
+          // Ensure dependencies are registered
+          if (importedModule.binds) {
+            importedModule.binds.forEach(
+              ({ importingProvider, importedProvider }) => {
+                if (importingProvider === provider.provide) {
+                  addDependencyIfMissing(provider.provide, importedProvider);
+                }
+              }
+            );
+          }
+        });
+        processModule(importedModule.module);
+      });
     }
 
     // Register providers
     if (module.providers && Array.isArray(module.providers)) {
-      module.providers.forEach(provider => {
+      module.providers.forEach((provider) => {
         // Provider might be a class or an object with provide/useClass properties
         if (typeof provider === 'function') {
           // It's a class
@@ -36,7 +51,7 @@ export function bootstrap(rootModule: Module) {
             const ctor = provider.useClass;
             ctor[tokenName] = provider.provide;
             serviceRegistry().set(provider.provide, ctor);
-          } else if(provider.provide && provider.useFactory) {
+          } else if (provider.provide && provider.useFactory) {
             // It's a factory provider
             const factory = provider.useFactory;
             const value = factory();
@@ -49,12 +64,16 @@ export function bootstrap(rootModule: Module) {
 
   // Start processing from the root module
   processModule(rootModule);
-
-  // Initialize the container to resolve all dependencies
-  // initializeContainer();
-
-  // // Return the root instance if there's a bootstrap provider
-  // if (rootModule.bootstrap) {
-  //   return inject(rootModule.bootstrap);
-  // }
 }
+
+const addDependencyIfMissing = (tokenToCheck: Token, tokenToAdd: Token) => {
+  const registered = serviceRegistry().get(tokenToCheck);
+  if (registered && typeof registered === 'function') {
+    const deps = registered[dependencies] || [];
+    const depTokens = deps.map((dep: any) => dep.token);
+    if (!depTokens.includes(tokenToAdd)) {
+      deps.push({ token: tokenToAdd });
+      registered[dependencies] = deps;
+    }
+  }
+};
