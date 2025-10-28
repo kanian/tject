@@ -38,7 +38,7 @@ class MyService {
 
 Use the `@Inject` decorator to inject dependencies into a class using tokens:
 
-```typescript
+````typescript
 const MY_SERVICE_TOKEN = Symbol('MyServiceToken');
 
 @Service({ token: MY_SERVICE_TOKEN })
@@ -53,60 +53,252 @@ class ConsumerService {
   constructor(@Inject(MY_SERVICE_TOKEN) private myService: MyService) {}
 
   getValue() {
-    return this.myService.getValue();
-  }
-}
-```
+    # typejection — Dependency Injection for TypeScript
 
-### Transient Services
+    A lightweight TypeScript dependency-injection system with support for:
 
-Transient services are created anew each time they are requested. To define a transient service, specify the lifecycle option as 'transient' in the `@Service` decorator and use a token for registration:
+    - singleton and transient lifecycles
+    - token-based providers (string / symbol / class)
+    - value and factory providers
+    - a module system and bootstrap helper
 
-```typescript
-const TRANSIENT_SERVICE_TOKEN = Symbol('TransientServiceToken');
+    Core APIs
+    - `Service` decorator: `src/decorators/Service.ts`
+    - Field decorator: `Inject` — `src/decorators/Inject.ts`
+    - Programmatic injection: `inject` — `src/functions/inject.ts`
+    - Register values: `registerValue` — `src/functions/registerValue.ts`
+    - Module bootstrap: `bootstrap` — `src/functions/bootstrap.ts`
+    - Reset container (tests): `resetContainer` — `src/functions/resetContainer.ts`
 
-@Service({ token: TRANSIENT_SERVICE_TOKEN, lifecycle: 'transient' })
-class TransientService {
-  public value: number = Math.random();
-}
+    Quick install
 
-// Usage
-const instance1: TransientService = inject(TRANSIENT_SERVICE_TOKEN);
-const instance2: TransientService = inject(TRANSIENT_SERVICE_TOKEN);
+    ```bash
+    npm install
+    ```
 
-console.log(instance1.value !== instance2.value); // true, different instances
-```
+    Basic usage
 
-### Initializing the Container
+    Register a class as a service with the decorator:
 
-Call `initializeContainer()` to resolve all registered services:
+    ```ts
+    @Service()
+    class MyService {
+      getValue() { return 'hello'; }
+    }
+    ```
 
-```typescript
-initializeContainer();
-```
+    Inject a dependency into a field:
 
-### Using Modules
+    ```ts
+    const LOGGER = Symbol('Logger');
 
-Define modules to group related services:
+    @Service({ token: LOGGER })
+    class Logger { log(msg: string) { console.log(msg); } }
 
-```typescript
-const myModule = new Module({
-  providers: [MyService, ConsumerService],
-});
-```
+    @Service()
+    class Consumer {
+      @Inject(LOGGER) private logger!: Logger;
+      doWork() { this.logger.log('work'); }
+    }
+    ```
 
-### Bootstrapping the Application
+    Programmatic injection:
 
-Use the `bootstrap` function to initialize the application with a root module:
+    ```ts
+    const svc = inject<MyService>(MyService);
+    ```
 
-```typescript
-bootstrap(myModule);
-```
+    Register values or factories (via Module providers):
 
-## Contributing
+    ```ts
+    // value provider
+    { provide: 'CONFIG', useValue: { apiUrl: 'https://api' } }
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue.
+    // factory provider
+    { provide: 'ID', useFactory: () => crypto.randomUUID() }
 
-## License
+    // class provider (raw class)
+    MyService
+    ```
 
-This project is licensed under the MIT License.
+    Modules and bootstrap
+
+    ```ts
+    const appModule = new Module({
+      providers: [
+        # typejection — Dependency Injection for TypeScript
+
+        A lightweight TypeScript dependency-injection system with support for:
+
+        - singleton and transient lifecycles
+        - token-based providers (string / symbol / class)
+        - value and factory providers
+        - a module system and bootstrap helper
+
+        Core APIs
+        - `Service` decorator: `src/decorators/Service.ts`
+        - Field decorator: `Inject` — `src/decorators/Inject.ts`
+        - Programmatic injection: `inject` — `src/functions/inject.ts`
+        - Register values: `registerValue` — `src/functions/registerValue.ts`
+        - Module bootstrap: `bootstrap` — `src/functions/bootstrap.ts`
+        - Reset container (tests): `resetContainer` — `src/functions/resetContainer.ts`
+
+        Quick install
+
+        ```bash
+        npm install
+        ```
+
+        Basic usage
+
+        Register a class as a service with the decorator:
+
+        ```ts
+        @Service()
+        class MyService {
+          getValue() { return 'hello'; }
+        }
+        ```
+
+        Inject a dependency into a field:
+
+        ```ts
+        const LOGGER = Symbol('Logger');
+
+        @Service({ token: LOGGER })
+        class Logger { log(msg: string) { console.log(msg); } }
+
+        @Service()
+        class Consumer {
+          @Inject(LOGGER) private logger!: Logger;
+          doWork() { this.logger.log('work'); }
+        }
+        ```
+
+        Programmatic injection:
+
+        ```ts
+        const svc = inject<MyService>(MyService);
+        ```
+
+        Module providers — the three supported forms
+
+        When configuring a `Module`, a provider can be declared in one of three ways. The module system supports:
+
+        - useClass — register a class to be instantiated when the token is requested
+          ```ts
+          { provide: 'MyToken', useClass: MyService }
+          ```
+
+        - useValue — register a static value (useful for configuration)
+          ```ts
+          { provide: 'CONFIG', useValue: { apiUrl: 'https://api' } }
+          ```
+
+        - useFactory — register a factory function that returns the value/instance
+          ```ts
+          { provide: 'ID', useFactory: () => Math.random().toString(36).slice(2) }
+          ```
+
+        You may also pass a raw class directly in `providers` as a shorthand (the class will be registered by its constructor token):
+
+        ```ts
+        providers: [ MyService ]
+        ```
+
+        Modules and imports
+
+        Modules may import other modules. Importing a module makes its providers available to the importing module (the bootstrap process walks imports and registers providers from imports as well as the root module). Example:
+
+        ```ts
+        const moduleA = new Module({ providers: [{ provide: 'A', useClass: ServiceA }] });
+        const rootModule = new Module({ imports: [moduleA], providers: [{ provide: 'B', useClass: ServiceB }] });
+        bootstrap(rootModule);
+        ```
+
+        Modules are the preferred way to compose large applications and to group related providers and configuration.
+
+        Modules and bootstrap (short example)
+
+        ```ts
+        const appModule = new Module({
+          providers: [
+            { provide: 'CONFIG', useValue: { env: 'dev' } },
+            MyService,
+          ],
+        });
+        bootstrap(appModule);
+        ```
+
+        Runtimes and decorator support
+
+        The new TypeScript decorator standard (Stage 3) is supported differently by runtimes. Choose the workflow that matches your runtime.
+
+        1) Deno — Native Stage 3 support
+
+        - Deno executes TypeScript natively and supports Stage 3 decorators.
+        - How to run:
+
+        ```bash
+        deno run --allow-read your-file.ts
+        ```
+
+        - tsconfig: Deno is zero-config; omit the old experimental decorator flag (do not set "experimentalDecorators": true).
+
+        2) Node.js — Transpile first
+
+        - Node's V8 does not yet support Stage 3 decorator syntax. Transpile first with `tsc`, then run the compiled JavaScript.
+        - How to run:
+
+        ```bash
+        # 1) compile
+        npm run build
+
+        # 2) run compiled JS
+        node dist/your-file.js
+        ```
+
+        - tsconfig: Use Stage 3 settings — omit or set `"experimentalDecorators": false` so `tsc` emits Stage 3-compatible transpiled JS.
+
+        3) Bun — Two modes (legacy native vs transpiled JS)
+
+        - Bun's native TypeScript transpiler supports legacy decorators only (the older emit).
+        - To use Stage 3 decorators (this project): transpile with `tsc` and run the compiled JS with Bun or Node.
+
+        ```bash
+        npm run build
+        bun run dist/your-file.js
+        ```
+
+        - Summary:
+          - Bun native (`bun run file.ts`): legacy decorators only (requires `"experimentalDecorators": true` in tsconfig).
+          - Bun running compiled JS: works with Stage 3 (transpile with `tsc` which uses `"experimentalDecorators": false`).
+
+        Recommended tsconfig for Stage 3 (this repository)
+
+        - See `tsconfig.json`. Important bits:
+          - `"experimentalDecorators": false` (or omit) to use the new Stage 3 decorators.
+          - Compile to a target like `ES2015` so `tsc` emits plain JS that Node/Bun can run.
+
+        Running tests (notes)
+
+        - Tests in this repo are TypeScript test files. Bun's native test runner for `.ts` files will use Bun's transpiler and therefore may fail when Stage 3 decorators are present.
+        - Recommended approaches:
+          1) Transpile first with `tsc` then run compiled tests (or test harness) against `dist/`.
+          2) Use Deno for native Stage 3 support if you want to run TypeScript directly.
+
+        Helpful files
+        - Main exports: `src/index.ts`
+        - Decorators: `src/decorators/Service.ts`, `src/decorators/Inject.ts`
+        - Injector: `src/functions/inject.ts`
+        - Bootstrap: `src/functions/bootstrap.ts`
+        - Registry / reset: `src/functions/serviceRegistry.ts`, `src/functions/resetContainer.ts`
+        - Config: `package.json`, `tsconfig.json`
+
+        Contributing
+
+        - Open a PR. Run `npm run build` and verify behavior on your target runtime.
+
+        License
+        - MIT
+````
