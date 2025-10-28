@@ -1,6 +1,6 @@
 # Dependency Injection System
 
-This project is a TypeScript-based Dependency Injection (DI) system designed to facilitate the management of dependencies in a modular and scalable way. It supports features such as singleton and transient lifecycles, autowiring of dependencies, and custom token names for services.
+This project is a TypeScript-based Dependency Injection (DI) system designed to facilitate the management of dependencies in a modular and scalable way. It supports features such as singleton and transient lifecycles, and custom token names for services.
 
 ## Features
 

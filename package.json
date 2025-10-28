@@ -1,12 +1,12 @@
 {
-  "name": "@kanian77/typejection",
+  "name": "@kanian77/tject",
   "version": "0.1.2",
   "description": "A dependency injection library for TypeScript.",
   "author": {
     "name": "Patrick Assoa Adou",
     "email": "kanian77@gmail.com"
   },
-  "repository": "git@github.com:kanian/typejection.git",
+  "repository": "git@github.com:kanian/tject.git",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
