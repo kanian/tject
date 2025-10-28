@@ -1,3 +1,4 @@
+import { ScopeToken } from "./ScopeToken";
 import { Token } from "./Token";
 
 /**
@@ -6,4 +7,5 @@ import { Token } from "./Token";
 export interface DependencyDescriptor {
   token: Token;
   value?: any; // For value dependencies
+  scope?: ScopeToken
 }

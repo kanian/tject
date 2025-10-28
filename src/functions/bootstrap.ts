@@ -1,5 +1,7 @@
+import { DependencyDescriptor } from '../types/DependencyDescriptor';
 import { ImportOptions } from '../types/ImportOptions';
 import { Module } from '../types/Module';
+import { ProviderOptions } from '../types/ProviderOptions';
 import { ScopeToken } from '../types/ScopeToken';
 import { dependencies, tokenName } from '../types/symbols';
 import { Token } from '../types/Token';
@@ -18,20 +20,29 @@ export const bootstrap = (scopedModule: Module) => {
 
     // Process imported modules first
     if (module.imports && Array.isArray(module.imports)) {
-      module.imports.forEach((importedModule: ImportOptions) => {
-        module.providers.forEach((provider: any) => {
+      module.imports.forEach((moduleImportDescription: ImportOptions) => {
+        module.providers.forEach((provider: ProviderOptions) => {
           // Ensure dependencies are registered
-          if (importedModule.binds) {
-            importedModule.binds.forEach(
-              ({ to: importingProvider, from: importedProvider }) => {
+          if (
+            typeof provider === 'object' &&
+            moduleImportDescription.binds &&
+            Array.isArray(moduleImportDescription.binds)
+          ) {
+            moduleImportDescription.binds.forEach(
+              ({ to: importingProvider, from: importedProvider, inScope }) => {
                 if (importingProvider === provider.provide) {
-                  addDependencyIfMissing(provider.provide, importedProvider, scope);
+                  addDependencyIfMissing(
+                    provider.provide,
+                    importedProvider,
+                    module.scope,
+                    inScope
+                  );
                 }
               }
             );
           }
         });
-        processModule(importedModule.module);
+        processModule(moduleImportDescription.module);
       });
     }
 
@@ -66,15 +77,28 @@ export const bootstrap = (scopedModule: Module) => {
 
   // Start processing from the root module
   processModule(scopedModule);
-}
+};
 
-const addDependencyIfMissing = (tokenToCheck: Token, tokenToAdd: Token, scope?: ScopeToken) => {
-  const registered = getServiceRegistry(scope).get(tokenToCheck);
+/**
+ * Adds a dependency to a service if it is described in binds but not already present in service's declared dependencies.
+ * @param tokenToCheck The token on which to check that the dependency is present
+ * @param tokenToAdd The token whose dependency should be added if missing
+ * @param tokenToCheckScope The scope of the token to check
+ * @param tokenToAddScope The scope of the token to add
+ */
+const addDependencyIfMissing = (
+  tokenToCheck: Token,
+  tokenToAdd: Token,
+  tokenToCheckScope?: ScopeToken,
+  tokenToAddScope?: ScopeToken
+) => {
+  const registered = getServiceRegistry(tokenToCheckScope).get(tokenToCheck);
   if (registered && typeof registered === 'function') {
-    const deps = registered[dependencies] || [];
-    const depTokens = deps.map((dep: any) => dep.token);
+    const deps: Array<DependencyDescriptor> = registered[dependencies] || [];
+
+    const depTokens = deps.map((dep: DependencyDescriptor) => dep.token);
     if (!depTokens.includes(tokenToAdd)) {
-      deps.push({ token: tokenToAdd });
+      deps.push({ token: tokenToAdd, scope: tokenToAddScope });
       registered[dependencies] = deps;
     }
   }

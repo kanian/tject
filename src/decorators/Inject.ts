@@ -41,7 +41,7 @@ export function Inject(token: Token, lazy = false, scope?: ScopeToken) {
       }
 
       if (!lazy) {
-        const registeredValue = inject(token);
+        const registeredValue = inject(token, false, scope);
 
         Object.defineProperty(this, context.name, {
           value: registeredValue,
@@ -56,7 +56,7 @@ export function Inject(token: Token, lazy = false, scope?: ScopeToken) {
         Object.defineProperty(this, context.name, {
           get() {
             if (!_value) {
-              _value = inject(token);
+              _value = inject(token, false, scope);
             }
             return _value;
           },

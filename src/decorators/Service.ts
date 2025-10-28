@@ -9,6 +9,7 @@ import {
 import { Token } from '../types/Token';
 import { registerService } from '../functions/registries';
 import { inject } from '../functions/inject';
+import { DependencyDescriptor } from '../types/DependencyDescriptor';
 
 /**
  * Modern Service decorator using TS 5+ decorator syntax.
@@ -25,7 +26,7 @@ export function Service(options?: ServiceOptions) {
     const ctor = target;
 
     let isTransient = false;
-    let deps: Array<Token | any> = [];
+    let deps: Array<DependencyDescriptor> = [];
 
     // Check if the argument is a valid options object
     if (
@@ -49,7 +50,7 @@ export function Service(options?: ServiceOptions) {
       ctor[dependencies] = [];
     }
     if (deps.length > 0) {
-      ctor[dependencies] = deps.map((dep) => ({ token: dep }));
+      ctor[dependencies] = deps.map((dep): DependencyDescriptor => ({ token: dep.token, scope: dep.scope }));
     }
 
     // Register the service - use the token if provided, otherwise use the class itself
@@ -63,11 +64,11 @@ export function Service(options?: ServiceOptions) {
         Object.defineProperty(ctor, 'instance', {
           get: () => {
             if (isTransient) {
-              return inject(ctor, true);
+              return inject(ctor, true, options?.scope);
             }
 
             if (!ctor[singleton]) {
-              inject(ctor);
+              inject(ctor, false, options?.scope);
             }
             return ctor[singleton];
           },

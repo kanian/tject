@@ -285,8 +285,8 @@ describe('Bootstrap Functionality', () => {
     createScope(SCOPE_Y);
     @Service({ token: 'ServiceY', scope: SCOPE_Y })
     class ServiceY {
-      @Inject('ServiceX') private serviceX!: ServiceX;
-      constructor() {}
+
+      constructor(private serviceX: ServiceX) {}
       getValue() {
         return this.serviceX.getValue() + 'Y';
       }
@@ -316,6 +316,7 @@ describe('Bootstrap Functionality', () => {
             {
               to: 'ServiceY',
               from: 'ServiceX',
+              inScope: SCOPE_X
             },
           ],
         },

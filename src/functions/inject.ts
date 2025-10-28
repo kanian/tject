@@ -64,7 +64,7 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
 
   const deps = ctor[dependencies] || [];
   const resolvedDeps = deps.map((dep) => {
-    const depInstance = inject(dep.token);
+    const depInstance = inject(dep.token, false, dep.scope);
     if (!depInstance) {
       throw new Error(
         `Failed to resolve dependency for token "${String(dep.token)}"`

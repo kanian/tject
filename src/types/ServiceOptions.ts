@@ -1,3 +1,4 @@
+import { DependencyDescriptor } from "./DependencyDescriptor";
 import { ScopeToken } from "./ScopeToken";
 import { Token } from "./Token";
 
@@ -7,7 +8,7 @@ import { Token } from "./Token";
  */
 export interface ServiceOptions {
   token?: string | symbol; // Optional token name
-  dependencies?: Array<Token | any>; // Dependencies can be tokens or direct values
+  dependencies?: Array<DependencyDescriptor>; // Dependencies can be tokens or direct values
   lifecycle?: 'singleton' | 'transient'; // Singleton by default
   scope?: ScopeToken; // Optional scope for the service
 }
