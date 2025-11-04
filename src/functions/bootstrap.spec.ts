@@ -227,7 +227,7 @@ describe('Bootstrap Functionality', () => {
 
     @Service({ token: 'ServiceY' })
     class ServiceY {
-      @Inject('ServiceX') private serviceX!: ServiceX;
+      @Inject({ token: 'ServiceX' }) private serviceX!: ServiceX;
       constructor() {}
       getValue() {
         return this.serviceX.getValue() + 'Y';
@@ -285,7 +285,6 @@ describe('Bootstrap Functionality', () => {
     createScope(SCOPE_Y);
     @Service({ token: 'ServiceY', scope: SCOPE_Y })
     class ServiceY {
-
       constructor(private serviceX: ServiceX) {}
       getValue() {
         return this.serviceX.getValue() + 'Y';
@@ -316,12 +315,12 @@ describe('Bootstrap Functionality', () => {
             {
               to: 'ServiceY',
               from: 'ServiceX',
-              inScope: SCOPE_X
+              inScope: SCOPE_X,
             },
           ],
         },
       ],
-      scope: SCOPE_Y
+      scope: SCOPE_Y,
     });
     const rootModule = new Module({
       imports: [{ module: moduleY }],

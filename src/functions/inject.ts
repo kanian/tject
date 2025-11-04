@@ -37,6 +37,7 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
     );
   }
   resolvingMap.set(token, { lazy: false });
+
   let ctor: U;
   // if (typeof token === 'string' || typeof token === 'symbol') {
   const registered = getServiceRegistry(scope).get(token);
@@ -44,7 +45,6 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
     resolvingMap.delete(token);
     throw new Error(`No dependency registered for token "${String(token)}"`);
   }
-
   if (registered.isValue) {
     resolvingMap.delete(token);
     return registered.value;
@@ -74,7 +74,6 @@ export const inject = <T, U extends Injectable<T> = Injectable<T>>(
   });
 
   const instance = new ctor(...resolvedDeps);
-
   // Only cache singleton instances
   if (!isTransient && !forceNew) {
     ctor[singleton] = instance;

@@ -3,6 +3,7 @@ import { getResolvingMap, getServiceRegistry } from '../functions/registries';
 import { Injectable } from '../types/Injectable';
 import { inject } from '../functions/inject';
 import { ScopeToken } from '../types/ScopeToken';
+import { InjectOptions } from '../types/InjectOptions';
 
 /**
  * The token must be registered in the service registry.
@@ -24,7 +25,8 @@ import { ScopeToken } from '../types/ScopeToken';
  * }
  *
  */
-export function Inject(token: Token, lazy = false, scope?: ScopeToken) {
+export function Inject(options: InjectOptions) {
+  const { token, lazy = false, scope } = options;
   return function <T extends Injectable<any>>(
     target: undefined,
     context: ClassFieldDecoratorContext | ClassAccessorDecoratorContext

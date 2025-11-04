@@ -24,7 +24,7 @@ describe('Enhanced Dependency Injection System', () => {
       }
       @Service({ token: 'ServiceB' })
       class ServiceB {
-        @Inject('ServiceA') private serviceA!: ServiceA;
+        @Inject({ token: 'ServiceA' }) private serviceA!: ServiceA;
         constructor() {}
         getValue() {
           return this.serviceA.getValue() + 'B';
@@ -41,14 +41,14 @@ describe('Enhanced Dependency Injection System', () => {
     it('should throw on circular dependencies', () => {
       @Service({ token: 'ServiceA' })
       class ServiceA {
-        @Inject('ServiceB') private serviceB!: ServiceB;
+        @Inject({ token: 'ServiceB' }) private serviceB!: ServiceB;
         getValue() {
           return 'A';
         }
       }
       @Service({ token: 'ServiceB' })
       class ServiceB {
-        @Inject('ServiceA') private serviceA!: ServiceA;
+        @Inject({ token: 'ServiceA' }) private serviceA!: ServiceA;
         constructor() {}
         getValue() {
           return this.serviceA.getValue() + 'B';
@@ -63,14 +63,14 @@ describe('Enhanced Dependency Injection System', () => {
     it('should not throw on lazy handling of circular dependencies', () => {
       @Service({ token: 'ServiceA' })
       class ServiceA {
-        @Inject('ServiceB', true) private serviceB!: ServiceB;
+        @Inject({ token: 'ServiceB', lazy: true }) private serviceB!: ServiceB;
         getValue() {
           return 'A';
         }
       }
       @Service({ token: 'ServiceB' })
       class ServiceB {
-        @Inject('ServiceA', true) private serviceA!: ServiceA;
+        @Inject({ token: 'ServiceA', lazy: true }) private serviceA!: ServiceA;
         constructor() {}
         getValue() {
           return this.serviceA.getValue() + 'B';
@@ -120,7 +120,7 @@ describe('Enhanced Dependency Injection System', () => {
 
       @Service({ token: 'ApiService' })
       class ApiService {
-        @Inject(CONFIG_TOKEN) private config: any;
+        @Inject({ token: CONFIG_TOKEN }) private config: any;
         constructor() {}
 
         getApiUrl() {
@@ -146,8 +146,8 @@ describe('Enhanced Dependency Injection System', () => {
       registerValue('AGE', 42);
       @Service({ token: 'MixedService' })
       class MixedService {
-        @Inject('HELPER') public helper!: Helper;
-        @Inject('AGE') public age!: number;
+        @Inject({ token: 'HELPER' }) public helper!: Helper;
+        @Inject({ token: 'AGE' }) public age!: number;
         constructor() {}
 
         getValues() {
