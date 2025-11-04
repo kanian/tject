@@ -21,11 +21,13 @@
 ```bash
 bun add @kanian77/tject
 ```
+
 or
 
 ```bash
 npm install @kanian77/tject
 ```
+
 ## Basic usage
 
 Register a class as a service with the decorator:
@@ -33,7 +35,9 @@ Register a class as a service with the decorator:
 ```ts
 @Service()
 class MyService {
-  getValue() { return 'hello'; }
+  getValue() {
+    return 'hello';
+  }
 }
 ```
 
@@ -43,12 +47,18 @@ Inject a dependency into a field:
 const LOGGER = Symbol('Logger');
 
 @Service({ token: LOGGER })
-class Logger { log(msg: string) { console.log(msg); } }
+class Logger {
+  log(msg: string) {
+    console.log(msg);
+  }
+}
 
 @Service()
 class Consumer {
-  @Inject(LOGGER) private logger!: Logger;
-  doWork() { this.logger.log('work'); }
+  @Inject({ token: LOGGER }) private logger!: Logger;
+  doWork() {
+    this.logger.log('work');
+  }
 }
 ```
 
@@ -58,6 +68,7 @@ Programmatic injection:
 const svc = inject<MyService>(MyService);
 // See src/functions/inject.spec.ts for more info
 ```
+
 See [inject.ts](src/functions/inject.ts) and [inject.spec.ts](src/functions/inject.spec.ts) for more info
 Register values or factories (via Module providers):
 
@@ -111,8 +122,13 @@ When configuring a `Module`, a provider can be declared in one of three ways. Th
 Modules may import other modules. Importing a module makes its providers available to the importing module (the bootstrap process walks imports and registers providers from imports as well as the root module). Example:
 
 ```ts
-const moduleA = new Module({ providers: [{ provide: 'A', useClass: ServiceA }] });
-const rootModule = new Module({ imports: [{ module: ModuleA }], providers: [{ provide: 'B', useClass: ServiceB }] });
+const moduleA = new Module({
+  providers: [{ provide: 'A', useClass: ServiceA }],
+});
+const rootModule = new Module({
+  imports: [{ module: ModuleA }],
+  providers: [{ provide: 'B', useClass: ServiceB }],
+});
 bootstrap(rootModule);
 ```
 
@@ -135,15 +151,19 @@ Example (from tests):
 
 ```ts
 // moduleX provides ServiceX under token 'ServiceX'
-const moduleX = new Module({ providers: [{ provide: 'ServiceX', useClass: ServiceX }] });
+const moduleX = new Module({
+  providers: [{ provide: 'ServiceX', useClass: ServiceX }],
+});
 
 // moduleY provides ServiceY which depends on ServiceX but is declared under a different token
 const moduleY = new Module({
   providers: [{ provide: 'ServiceY', useClass: ServiceY }],
-  imports: [{
-    module: moduleX,
-    binds: [{ to: 'ServiceY', from: 'ServiceX' }]
-  }],
+  imports: [
+    {
+      module: moduleX,
+      binds: [{ to: 'ServiceY', from: 'ServiceX' }],
+    },
+  ],
 });
 
 // When bootstrapping the root module, the bind is processed and
@@ -153,12 +173,15 @@ bootstrap(new Module({ imports: [{ module: moduleY }] }));
 const instanceY = inject('ServiceY');
 // instanceY.getValue() can now call into ServiceX because the dependency was added
 ```
+
 // Look at tests for more examples of import binds with scopes: `src/functions/bootstrap.spec.ts`
+
 ## Runtimes and decorator support
 
 The new TypeScript decorator standard (Stage 3) is supported differently by runtimes. Choose the workflow that matches your runtime.
 
 1. Deno — Native Stage 3 support
+
 - Deno executes TypeScript natively and supports Stage 3 decorators.
 - How to run:
 
@@ -167,7 +190,9 @@ deno run --allow-read your-file.ts
 ```
 
 - tsconfig: Deno is zero-config; omit the old experimental decorator flag (do not set "experimentalDecorators": true).
+
 2. Node.js — Transpile first
+
 - Node's V8 does not yet support Stage 3 decorator syntax. Transpile first with `tsc`, then run the compiled JavaScript.
 - How to run:
 
@@ -180,7 +205,9 @@ node dist/your-file.js
 ```
 
 - tsconfig: Use Stage 3 settings — omit or set `"experimentalDecorators": false` so `tsc` emits Stage 3-compatible transpiled JS.
+
 3. Bun — Two modes (legacy native vs transpiled JS)
+
 - Bun's native TypeScript transpiler supports legacy decorators only (the older emit).
 - To use Stage 3 decorators (this project): transpile with `tsc` and run the compiled JS with Bun or Node.
 
