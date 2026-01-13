@@ -242,10 +242,21 @@ Helpful files
 - Registry / reset: `src/functions/serviceRegistry.ts`, `src/functions/resetContainer.ts`
 - Config: `package.json`, `tsconfig.json`
 
-Contributing
+## Advanced Examples
+
+For more complex usage scenarios, check out the following test files which serve as comprehensive examples:
+
+- [Complex DI & Circular Dependencies](src/di.spec.ts): Demonstrates lazy injection, transient lifecycles, and deep dependency graphs.
+- [Module System & Bindings](src/functions/bootstrap.spec.ts): Showcases nested module imports, provider overrides, and scope-based bindings.
+
+## Contributing
 
 - Open a PR. Run `npm run build` and verify behavior on your target runtime.
 
 License
 
 - MIT
+
+```
+
+```
